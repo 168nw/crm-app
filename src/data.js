@@ -23,3 +23,14 @@ export const addOrder = (order) => {
 export const deleteOrderById = (id) => {
   orders = orders.filter((order) => order.id !== id);
 };
+
+/**
+ * Обновление заказа (например, добавление скриншота).
+ * @param {string} id - Идентификатор заказа.
+ * @param {Object} updatedFields - Обновленные данные.
+ */
+export const updateOrder = (id, updatedFields) => {
+  orders = orders.map(order => 
+    order.id === id ? { ...order, ...updatedFields } : order
+  );
+};

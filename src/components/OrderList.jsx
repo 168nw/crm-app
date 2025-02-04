@@ -1,9 +1,24 @@
 import React from 'react';
-import { Table, Button, Space, Card, Image, Tag } from 'antd';
+import { Table, Button, Space, Card, Image, Tag, Upload } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 
-const OrderList = ({ orders, deleteOrder }) => {
-  // Проверяем данные, которые поступают в таблицу
-  console.log("Список заказов в таблице:", orders);
+
+const OrderList = ({ orders, deleteOrderById, updateOrder }) => {
+
+  // Функция для обработки загрузки изображения
+  const handleUpload = (file, record) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      updateOrder(record.id, { pay_order: reader.result }); 
+    };
+    return false; // Останавливаем автоматическую загрузку файла
+  };
+
+  // Функция удаления заказа
+  const handleDelete = (id) => {
+    deleteOrderById(id);
+  };
 
   const columns = [
     {
@@ -33,9 +48,9 @@ const OrderList = ({ orders, deleteOrder }) => {
       render: (picture) => (
         picture ? (
           <Image
-            width={70}
+            width={100}
             src={picture} // Используем URL изображения, сохраненного в `picture`
-            preview={{ mask: "Открыть изображение" }} // Добавляем подпись для превью
+            preview={{ mask: "Открыть" }} // Добавляем подпись для превью
           />
         ) : (
           <span>Нет изображения</span>
@@ -43,12 +58,38 @@ const OrderList = ({ orders, deleteOrder }) => {
       ),
     },
     {
+      title: 'Оплата заказа',
+      key: 'pay_order_upload',
+      render: (_, record) => (
+        <Space size="middle">
+          {!record.pay_order && (
+          <Upload beforeUpload={(file) => handleUpload(file, record)} showUploadList={false}>
+          <Button icon={<UploadOutlined />}></Button>
+        </Upload>
+          )}
+          {record.pay_order && (
+            <Image 
+              width={100} 
+              src={record.pay_order} 
+              preview={{ mask: 'Открыть' }} 
+              style={{ marginLeft: '10px' }} // Добавляем отступ для лучшего визуального восприятия
+            />
+          )}
+        </Space>
+      ),
+    },
+    {
       title: 'Статус заказа',
       key: 'actions',
       render: (_, record) => (
         <Space size="middle">
-          <span><Tag style={{ marginBottom: '10px' }} color="red">Не оплачен</Tag>
-          <Button  type="primary" danger onClick={() => deleteOrder(record.id)}>
+          <span>
+            {record.pay_order ? <Tag color="green">Оплачен</Tag> : <Tag color="red">Не оплачен</Tag>}
+          <Button  
+            type="primary" 
+            danger onClick={() => handleDelete(record.id)}
+            style={{ marginTop: '10px' }}
+            >
             Delete
           </Button>
           </span>
